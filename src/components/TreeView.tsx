@@ -1,62 +1,116 @@
-import React, { useMemo } from 'react';
-import ReactFlow, { 
-  Node, 
-  Edge,
+import React, { useCallback } from 'react';
+import {
   Background,
-  Controls,
-  MiniMap
-} from 'reactflow';
-import 'reactflow/dist/style.css';
-import type { TelegramUser } from '../lib/supabase';
+  ReactFlow,
+  addEdge,
+  ConnectionLineType,
+  Panel,
+  useNodesState,
+  useEdgesState,
+} from '@xyflow/react';
+import dagre from '@dagrejs/dagre';
+import { TelegramUser } from '../lib/supabase';
+
+import '@xyflow/react/dist/style.css';
+
+import { constructNodes, constructEdges } from '../lib/initialElements';
 
 type TreeViewProps = {
   users: TelegramUser[];
   onUserSelect: (user: TelegramUser) => void;
 };
 
-export function TreeView({ users, onUserSelect }: TreeViewProps) {
-  const { nodes, edges } = useMemo(() => {
-    const nodes: Node[] = users.map(user => ({
-      id: user.id,
-      data: { 
-        label: (
-          <div className="text-center">
-            <div className="font-medium">{user.first_name} {user.last_name}</div>
-            <div className="text-sm text-gray-500">@{user.username || 'no username'}</div>
-          </div>
-        )
+const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+
+const nodeWidth = 172;
+const nodeHeight = 36;
+
+const getLayoutedElements = (nodes, edges, direction = 'TB') => {
+  const isHorizontal = direction === 'LR';
+  dagreGraph.setGraph({ rankdir: direction });
+
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  const newNodes = nodes.map((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    const newNode = {
+      ...node,
+      targetPosition: isHorizontal ? 'left' : 'top',
+      sourcePosition: isHorizontal ? 'right' : 'bottom',
+      // We are shifting the dagre node position (anchor=center center) to the top left
+      // so it matches the React Flow node anchor point (top left).
+      position: {
+        x: nodeWithPosition.x - nodeWidth / 2,
+        y: nodeWithPosition.y - nodeHeight / 2,
       },
-      position: { x: 0, y: 0 },
-      type: 'default'
-    }));
+    };
 
-    const edges: Edge[] = users
-      .filter(user => user.invited_by)
-      .map(user => ({
-        id: `${user.invited_by}-${user.id}`,
-        source: user.invited_by!,
-        target: user.id,
-        type: 'smoothstep'
-      }));
+    return newNode;
+  });
 
-    return { nodes, edges };
-  }, [users]);
+  return { nodes: newNodes, edges };
+};
+
+export function TreeView({ users, onUserSelect }: TreeViewProps) {
+  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+    constructNodes(users),
+    constructEdges(users)
+  );
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
+
+  const onConnect = useCallback(
+    (params) =>
+      setEdges((eds) =>
+        addEdge(
+          { ...params, type: ConnectionLineType.SmoothStep, animated: true },
+          eds,
+        ),
+      ),
+    [],
+  );
+  const onLayout = useCallback(
+    (direction) => {
+      const { nodes: layoutedNodes, edges: layoutedEdges } =
+        getLayoutedElements(nodes, edges, direction);
+
+      setNodes([...layoutedNodes]);
+      setEdges([...layoutedEdges]);
+    },
+    [nodes, edges],
+  );
 
   return (
-    <div className="h-[600px] bg-gray-50 rounded-lg">
-      <ReactFlow 
+    <div className="max-h-screen h-[600px] bg-gray-50 rounded-lg">
+      <ReactFlow
         nodes={nodes}
         edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        fitView
+        style={{ backgroundColor: "#F7F9FB" }}
         onNodeClick={(_, node) => {
           const user = users.find(u => u.id === node.id);
           if (user) onUserSelect(user);
         }}
-        fitView
       >
+        <Panel position="top-right" className='flex gap-1'>
+          <button onClick={() => onLayout('TB')}>↕️</button>
+          <button onClick={() => onLayout('LR')}>↔️</button>
+        </Panel>
         <Background />
-        <Controls />
-        <MiniMap />
       </ReactFlow>
     </div>
   );
-}
+};
