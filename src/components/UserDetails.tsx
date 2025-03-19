@@ -22,7 +22,7 @@ export function UserDetails({ user, invitedBy, invitedUsers, onClose }: UserDeta
             <h2 className="text-2xl font-bold">
               {user.first_name} {user.last_name}
             </h2>
-            <p className="text-gray-600">@{user.username || 'no username'}</p>
+            <p className="text-gray-600">{user.username || 'no username'}</p>
           </div>
         </div>
         <button
@@ -51,7 +51,7 @@ export function UserDetails({ user, invitedBy, invitedUsers, onClose }: UserDeta
                   {invitedBy.first_name} {invitedBy.last_name}
                 </p>
                 <p className="text-sm text-gray-500">
-                  @{invitedBy.username || 'no username'}
+                  {invitedBy.username || 'no username'}
                 </p>
               </div>
             </div>
@@ -72,7 +72,7 @@ export function UserDetails({ user, invitedBy, invitedUsers, onClose }: UserDeta
                       {invitedUser.first_name} {invitedUser.last_name}
                     </p>
                     <p className="text-sm text-gray-500">
-                      @{invitedUser.username || 'no username'}
+                      {invitedUser.username || 'no username'}
                     </p>
                   </div>
                 </div>

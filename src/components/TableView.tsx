@@ -42,7 +42,7 @@ export function TableView({ users, onUserSelect }: TableViewProps) {
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {user.username ? `@${user.username}` : '-'}
+                {user.username ?? '-'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {users.find(u => u.id === user.invited_by)?.username || '-'}

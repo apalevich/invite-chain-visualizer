@@ -9,7 +9,7 @@ export const constructNodes = (data: TelegramUser[]) => {
             id: user.id,
             type: user.invited_by === null ? 'input' : undefined,
             data: {
-                label: `${user.first_name} ${user.last_name} (${'@' + user.username || 'no username'})`
+                label: `${user.first_name} ${user.last_name} (${user.username || 'no username'})`
             },
             position
         }
