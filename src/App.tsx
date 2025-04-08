@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { TableView } from './components/TableView';
 import { TreeView } from './components/TreeView';
 import { UserDetails } from './components/UserDetails';
+import { LoginPage } from './components/LoginPage';
 import { supabase, type TelegramUser } from './lib/supabase';
-import { Table2, GitGraph, User2 } from 'lucide-react';
+import { verifyTelegramUser, type TelegramUser as TelegramAuthUser } from './lib/auth';
+import { Table2, GitGraph } from 'lucide-react';
 
 type View = 'table' | 'tree' | 'details';
 
@@ -13,6 +15,7 @@ function App() {
   const [selectedUser, setSelectedUser] = useState<TelegramUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [authenticatedUser, setAuthenticatedUser] = useState<TelegramUser | null>(null);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -34,10 +37,23 @@ function App() {
     fetchUsers();
   }, []);
 
+  const handleLogin = async (telegramUser: TelegramAuthUser) => {
+    const verifiedUser = await verifyTelegramUser(telegramUser);
+    if (verifiedUser) {
+      setAuthenticatedUser(verifiedUser);
+    } else {
+      setError('Access denied. Your Telegram account is not in the invite chain.');
+    }
+  };
+
   const handleUserSelect = (user: TelegramUser) => {
     setSelectedUser(user);
     setCurrentView('details');
   };
+
+  if (!authenticatedUser) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
 
   if (loading) {
     return (
@@ -59,9 +75,16 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">
-            Telegram Invite Chain Visualizer
-          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Telegram Invite Chain Visualizer
+            </h1>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">
+                Logged in as {authenticatedUser.username}
+              </span>
+            </div>
+          </div>
           
           <div className="flex space-x-4 mb-6">
             <button
@@ -99,8 +122,8 @@ function App() {
           {currentView === 'details' && selectedUser && (
             <UserDetails
               user={selectedUser}
-              invitedBy={users.find(u => u.telegram_id === selectedUser.invited_by)}
-              invitedUsers={users.filter(u => u.invited_by === selectedUser.telegram_id)}
+              invitedBy={users.find(u => u.id === selectedUser.invited_by)}
+              invitedUsers={users.filter(u => u.invited_by === selectedUser.id)}
               onClose={() => {
                 setSelectedUser(null);
                 setCurrentView('table');

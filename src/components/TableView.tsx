@@ -18,6 +18,7 @@ export function TableView({ users, onUserSelect }: TableViewProps) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invited By</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined At</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
@@ -49,6 +50,9 @@ export function TableView({ users, onUserSelect }: TableViewProps) {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {format(new Date(user.joined_at), 'PPP')}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {user.comment || '-'}
               </td>
             </tr>
           ))}

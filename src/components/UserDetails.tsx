@@ -1,7 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import type { TelegramUser } from '../lib/supabase';
-import { User, Calendar, UserPlus, X } from 'lucide-react';
+import { User, Calendar, UserPlus, X, MessageSquare } from 'lucide-react';
 
 type UserDetailsProps = {
   user: TelegramUser;
@@ -38,6 +38,13 @@ export function UserDetails({ user, invitedBy, invitedUsers, onClose }: UserDeta
           <Calendar className="h-5 w-5 mr-2" />
           <span>Joined on {format(new Date(user.joined_at), 'PPP')}</span>
         </div>
+
+        {user.comment && (
+          <div className="flex items-start text-gray-600">
+            <MessageSquare className="h-5 w-5 mr-2 mt-1" />
+            <span>{user.comment}</span>
+          </div>
+        )}
 
         {invitedBy && (
           <div className="border-t pt-4">
