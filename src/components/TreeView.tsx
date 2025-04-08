@@ -101,7 +101,7 @@ export function TreeView({ users, onUserSelect }: TreeViewProps) {
         fitView
         style={{ backgroundColor: "#F7F9FB" }}
         onNodeClick={(_, node) => {
-          const user = users.find(u => u.id === node.id);
+          const user = users.find(u => u.telegram_id === node.id);
           if (user) onUserSelect(user);
         }}
       >

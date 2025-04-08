@@ -99,8 +99,8 @@ function App() {
           {currentView === 'details' && selectedUser && (
             <UserDetails
               user={selectedUser}
-              invitedBy={users.find(u => u.id === selectedUser.invited_by)}
-              invitedUsers={users.filter(u => u.invited_by === selectedUser.id)}
+              invitedBy={users.find(u => u.telegram_id === selectedUser.invited_by)}
+              invitedUsers={users.filter(u => u.invited_by === selectedUser.telegram_id)}
               onClose={() => {
                 setSelectedUser(null);
                 setCurrentView('table');

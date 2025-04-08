@@ -23,7 +23,7 @@ export function TableView({ users, onUserSelect }: TableViewProps) {
         <tbody className="divide-y divide-gray-200">
           {users.map((user) => (
             <tr
-              key={user.id}
+              key={user.telegram_id}
               className="hover:bg-gray-50 cursor-pointer"
               onClick={() => onUserSelect(user)}
             >
@@ -45,7 +45,7 @@ export function TableView({ users, onUserSelect }: TableViewProps) {
                 {user.username ?? '-'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {users.find(u => u.id === user.invited_by)?.username || '-'}
+                {users.find(u => u.telegram_id === user.invited_by)?.username || '-'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {format(new Date(user.joined_at), 'PPP')}

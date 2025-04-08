@@ -65,7 +65,7 @@ export function UserDetails({ user, invitedBy, invitedUsers, onClose }: UserDeta
             </h3>
             <div className="space-y-3">
               {invitedUsers.map(invitedUser => (
-                <div key={invitedUser.id} className="flex items-center">
+                <div key={invitedUser.telegram_id} className="flex items-center">
                   <UserPlus className="h-5 w-5 text-gray-400 mr-2" />
                   <div>
                     <p className="font-medium">
