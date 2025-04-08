@@ -12,5 +12,5 @@ export type TelegramUser = {
   last_name: string | null;
   invited_by: string | null;
   joined_at: string;
-  comment: string;
+  comment: string | null;
 };
