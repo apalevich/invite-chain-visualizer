@@ -4,7 +4,7 @@ import { TreeView } from './components/TreeView';
 import { UserDetails } from './components/UserDetails';
 import { LoginPage } from './components/LoginPage';
 import { supabase, type TelegramUser } from './lib/supabase';
-import { verifyTelegramUser, type TelegramUser as TelegramAuthUser } from './lib/auth';
+import { verifyPassword } from './lib/auth';
 import { Table2, GitGraph } from 'lucide-react';
 
 type View = 'table' | 'tree' | 'details';
@@ -16,6 +16,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [authenticatedUser, setAuthenticatedUser] = useState<TelegramUser | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -37,12 +38,14 @@ function App() {
     fetchUsers();
   }, []);
 
-  const handleLogin = async (telegramUser: TelegramAuthUser) => {
-    const verifiedUser = await verifyTelegramUser(telegramUser);
-    if (verifiedUser) {
-      setAuthenticatedUser(verifiedUser);
+  const handleLogin = async (password: string) => {
+    setLoginError(null); // Reset error state
+    
+    const user = await verifyPassword(password);
+    if (user) {
+      setAuthenticatedUser(user);
     } else {
-      setError('Access denied. Your Telegram account is not in the invite chain.');
+      setLoginError('Invalid password. Please try again.');
     }
   };
 
@@ -52,7 +55,7 @@ function App() {
   };
 
   if (!authenticatedUser) {
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage onLogin={handleLogin} error={loginError} />;
   }
 
   if (loading) {

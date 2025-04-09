@@ -1,27 +1,28 @@
 import { supabase } from './supabase';
 
- export type TelegramUser = {
-   id: number;
-   first_name: string;
-   last_name?: string;
-   username?: string;
-   photo_url?: string;
-   auth_date: number;
-   hash: string;
- };
+// Define a test user that will be returned on successful password authentication
+export const testUser = {
+  telegram_id: 'test_user',
+  username: 'Test',
+  first_name: 'Test',
+  last_name: 'User',
+  invited_by: null,
+  joined_at: new Date().toISOString(),
+  comment: 'Test user for password authentication'
+};
 
- export async function verifyTelegramUser(user: TelegramUser) {
-   try {
-     const { data, error } = await supabase
-       .from('telegram_users')
-       .select('*')
-       .eq('telegram_id', user.id.toString())
-       .single();
-
-     if (error) throw error;
-     return data;
-   } catch (error) {
-     console.error('Error verifying Telegram user:', error);
-     return null;
-   }
- } 
+// Verify password against the environment variable
+export async function verifyPassword(password: string) {
+  const correctPassword = import.meta.env.VITE_AUTH_PASSWORD;
+  
+  if (!correctPassword) {
+    console.error('Authentication password not set in environment variables');
+    return null;
+  }
+  
+  if (password === correctPassword) {
+    return testUser;
+  }
+  
+  return null;
+}
